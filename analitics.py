@@ -8,7 +8,6 @@ class RedditTitleAnalyzer:
         self.posts = self._load_posts()
         
     def _load_posts(self):
-        
         try:
             with open(self.json_file_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
@@ -17,13 +16,9 @@ class RedditTitleAnalyzer:
             return []
     
     def analyze_sentiment(self, text):
-        
         analysis = TextBlob(text)
-        
         polarity = analysis.sentiment.polarity
-        
         subjectivity = analysis.sentiment.subjectivity
-        
         
         if polarity > 0.1:
             sentiment = "positive"
@@ -39,7 +34,6 @@ class RedditTitleAnalyzer:
         }
     
     def analyze_titles(self):
-        
         if not self.posts:
             print("Нет данных для анализа")
             return None
@@ -55,7 +49,11 @@ class RedditTitleAnalyzer:
             analysis = self.analyze_sentiment(title)
             results.append({
                 'title': title,
-                'analysis': analysis
+                'analysis': analysis,
+                'images': post.get('images', []),  
+                'url': post.get('url', ''),
+                'permalink': post.get('permalink', ''),
+                'subreddit': post.get('subreddit', '')
             })
             sentiment_counts[analysis['sentiment']] += 1
             
@@ -65,25 +63,15 @@ class RedditTitleAnalyzer:
             'detailed_results': results
         }
     
-    def print_analysis_summary(self, analysis_results):
-        
-        if not analysis_results:
-            return
-            
-        print(f"Проанализировано постов: {analysis_results['posts_analyzed']}")
-        
-
 if __name__ == "__main__":
-    
-    analyzer = RedditTitleAnalyzer("reddit_news_scraped.json")
+    analyzer = RedditTitleAnalyzer("reddit_posts_with_images.json")
     
     print("Анализируем...")
     results = analyzer.analyze_titles()
     
     if results:
-        analyzer.print_analysis_summary(results)
         
-       
-        with open("reddit_sentiment_analysis.json", "w", encoding='utf-8') as f:
+        
+        with open("reddit_sentiment_analysis_with_images.json", "w", encoding='utf-8') as f:
             json.dump(results, f, ensure_ascii=False, indent=2)
-        print("\nРезультаты сохранены в reddit_sentiment_analysis.json")
+        print("\nРезультаты сохранены")
