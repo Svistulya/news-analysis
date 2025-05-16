@@ -1,12 +1,11 @@
-import json
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 import requests
 from io import BytesIO
-from textblob import TextBlob
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from parser import RedditParser
 
 class RedditSentimentApp:
     def __init__(self, root):
@@ -14,27 +13,22 @@ class RedditSentimentApp:
         self.root.title("Reddit Sentiment Analyzer")
         self.root.geometry("1200x900")
         
-        self.data = self.load_data()
+        
+        self.parser = RedditParser()
+        self.data = self.parser.get_analyzed_posts()
+        
         self.current_images = []
         self.current_photo = None
         self.current_image_index = 0
         
         self.create_widgets()
-        
-    def load_data(self):
-        try:
-            with open('reddit_sentiment_analysis_with_images.json', 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except Exception as e:
-            print(f"Ошибка загрузки данных: {e}")
-            return None
     
     def create_widgets(self):
         if not self.data:
             tk.Label(self.root, text="Ошибка загрузки данных", fg="red").pack()
             return
         
-        
+        # Верхняя панель с общей статистикой
         stats_frame = ttk.LabelFrame(self.root, text="Общая статистика")
         stats_frame.pack(pady=10, padx=10, fill="x")
         
@@ -50,7 +44,7 @@ class RedditSentimentApp:
         self.create_posts_table()
         self.create_details_section()
         self.create_image_viewer()
-    
+        
     def create_sentiment_chart(self):
         chart_frame = ttk.LabelFrame(self.root, text="Распределение тональности")
         chart_frame.pack(pady=10, padx=10, fill="x")
